@@ -1,11 +1,13 @@
 # Distributed file system
 #### Erkka Rahikainen, Valtteri Kodisto, Joni Taajamo
 
-Project description
+The goal of this project is to design and implement a distributed file system which is scalable, fault-tolerant and consistent. 
 
 ## More indepth description of the topic and selected solution techniques
 
-### Python
+### Reverse proxy
+
+### Sequencing
 
 ### Virtualization and Kubernetes
 
@@ -15,7 +17,7 @@ Project description
 
 
 
-## Description of different nodeso
+## Description of different nodes
 
 ### Client
 
