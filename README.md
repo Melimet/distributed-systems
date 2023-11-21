@@ -4,7 +4,7 @@
 
 ## Introduction
 
-The aim of this project is to design and implement a distributed file system that is scalable, reliable and has a strong consistency while maintaining ease of deployment. The chosen architecture follows a Client-DHT-Nodes model, where the client communicates with a Distributed hash table(reverse proxy), which in turn interacts with the distributed clusters responsible for storing files. Each file directory has a hash key so a specific cluster is responsible for a set of directories decided by the DHT. Each cluster has a leader and a follower(read replica) in case if the leader node fails.
+The aim of this project is to design and implement a distributed file system that is scalable, reliable and has a strong consistency while maintaining ease of deployment. The use case is similiar to AWS s3, so it has large amounts of users storing large amounts of data. In this architecture the client communicates with a Distributed hash table(reverse proxy), which in turn interacts with the distributed clusters responsible for storing files. Each file root directory has a hash key so a specific cluster is responsible for a set of directories decided by the DHT. Each cluster has a leader and a follower (read replica) in case if the leader node fails.
 
 ## Architectural overview
 
@@ -13,15 +13,17 @@ The aim of this project is to design and implement a distributed file system tha
 
 ### Client
 
-The client initiates requests to the proxy and handles the responses received.
+The client initiates requests to the DHT which handles the responses received.
 
-### Reverse proxy
+### Distributed hash table (DHT)
 
-Responsible for handling client requests, the reverse proxy forwards them to the appropriate node. It plays a crucial role in the discovery, load balancing, and sequencing of requests.
+DHT is responsible for handling client requests. The client requests are then sent to a specific cluster based on a hash key formed from the file directory which the requests wants to use. One of the DHTs is the leader and others are followers. Whenever a new cluster is created, the leader DHT syncs the follower DHTs to match the updated hash table. The updated is then synchronously waited to process on follower nodes before more requests are processed. 
 
-### Nodes
+### Clusters
 
-Nodes store files, sends changes to other nodes, handle proxy requests, and contribute to the scalability of the system.
+Clusters consist of a leader node and follower nodes. The leader node is responsible for operating on the stored data(Create, update, delete). As the s3 use case is more read heavy, all the followers can respond to read requests, while only the leader is responsible for other data operations.
+
+Clusters are scaled by "splitting" them in half. Whenever a new cluster is created, the leader DHT is informed about the new Cluster and the hash key address space is updated. So for example if previously Cluster 1 had responsibilities for hash keys 1-10, now it is responsible for hash keys 1-5 and Cluster 2 is responsible for hash keys 6-10. At the start, Cluster 2's state would be based on Cluster 1's database state.
 
 ## Solution techniques
 
@@ -47,8 +49,8 @@ Redis is incorporated to enhance system performance, acting as a fast and scalab
 
 ### Client
 
-Initiates basic API requests, interacting with the reverse proxy for file operations.
 
+Initiates basic API requests, interacting with the reverse proxy for file operations.
 ### Reverse Proxy
 
 #### Discovery
