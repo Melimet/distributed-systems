@@ -1,57 +1,57 @@
-# Distributed file system
+# Distributed File System
 
 #### Erkka Rahikainen, Valtteri Kodisto, Joni Taajamo
 
 ## Introduction
 
-The aim of this project is to design and implement a distributed file system that is scalable, reliable and has a strong consistency while maintaining ease of deployment. The use case is similiar to AWS s3, so it has large amounts of users storing large amounts of data. In this architecture the client communicates with a Distributed hash table(reverse proxy), which in turn interacts with the distributed clusters responsible for storing files. Each file root directory has a hash key so a specific cluster is responsible for a set of directories decided by the DHT. Each cluster has a leader and a follower (read replica) in case if the leader node fails.
+The aim of this project is to design and implement a distributed file system that is scalable, reliable, and maintains strong consistency while ensuring ease of deployment. The use case is similar to AWS S3, catering to large numbers of users storing vast amounts of data. In this architecture, the client communicates with a Distributed Hash Table (DHT, acting as a reverse proxy), which in turn interacts with distributed clusters responsible for storing files. Each file's root directory is associated with a hash key, assigning a specific cluster to a set of directories determined by the DHT. Each cluster has a leader and a follower (read replica) to provide redundancy in case the leader node fails.
 
-## Architectural overview
+## Architectural Overview
 
 ![Architecture](https://github.com/Melimet/distributed-systems/assets/33700058/b09cdb32-0776-4bf0-b06f-02bdd806f0f2)
 
-
 ### Client
 
-The client initiates requests to the DHT which handles the responses received.
+The client initiates requests to the DHT, which then handles the responses.
 
-### Distributed hash table (DHT)
+### Distributed Hash Table (DHT)
 
-DHT is responsible for handling client requests. The client requests are then sent to a specific cluster based on a hash key formed from the file directory which the requests wants to use. One of the DHTs is the leader and others are followers. Whenever a new cluster is created, the leader DHT syncs the follower DHTs to match the updated hash table. The updated is then synchronously waited to process on follower nodes before more requests are processed. 
+The DHT is responsible for processing client requests, which are then forwarded to a specific cluster based on a hash key derived from the file directory targeted by the request. One of the DHTs acts as the leader, with the others as followers. When a new cluster is created, the leader DHT synchronizes the follower DHTs to reflect the updated hash table. This update is then synchronously processed on follower nodes before handling more requests.
 
-### Clusters and data storage nodes
+### Clusters and Data Storage Nodes
 ![Node architecture](https://github.com/Melimet/distributed-systems/assets/33700058/1636c968-48d8-4a30-bac1-7a2fcf3ddbcb)
 
-Clusters consist of a leader node and follower nodes. The leader node is responsible for operating on the stored data(Create, update, delete). As the s3 use case is more read heavy, all the followers can respond to read requests, while only the leader is responsible for other data operations.
+Clusters consist of a leader node and follower nodes. The leader node handles data operations (create, update, delete). Given the S3 use case's read-heavy nature, all followers can respond to read requests, while only the leader handles other data operations.
 
-Clusters are scaled by "splitting" them in half. Whenever a new cluster is created, the leader DHT is informed about the new Cluster and the hash key address space is updated. So for example if previously Cluster 1 had responsibilities for hash keys 1-10, now it is responsible for hash keys 1-5 and Cluster 2 is responsible for hash keys 6-10. At the start, Cluster 2's state would be based on Cluster 1's database state.
+Clusters scale by "splitting" in half. When a new cluster is formed, the leader DHT updates the hash key address space. For example, if Cluster 1 initially managed hash keys 1-10, it might now handle keys 1-5, with Cluster 2 taking over keys 6-10. Initially, Cluster 2's state mirrors that of Cluster 1's database.
 
-## Solution techniques
+## Solution Techniques
 
-### Logical clock
+### Logical Clock
 
-Logical clocks are used to maintain the order of operations inside a cluster. The sequence ID requested from the leader node to ensure consistency among nodes in a cluster.
+Logical clocks ensure the order of operations within a cluster. Sequence IDs are requested from the leader node to maintain consistency among nodes.
 
 ### Synchronization
 
-If a follower node is out of sync, it will be detected when the node asks the leader node for the latest sequence id. After a timeout, the follower node will then send a synchronization request to the leader node to get the missing requests. Leader nodes will store `x` latest requests to be able to synchronize with other nodes. Leader node of a cluster will never be out of sync as it is the only one processing state mutating requests.
+If a follower node falls out of sync, it's detected when the node requests the latest sequence ID from the leader. After a timeout, the follower sends a synchronization request to the leader to retrieve missing requests. Leader nodes store `x` number of latest requests for synchronization purposes. A leader node of a cluster will never be out of sync as it exclusively processes state-changing requests.
 
-If the node responding does not have the missing requests, the node that sent the synchronization request will discard its entire database and request a full synchronization from a node.
+If a node lacks the missing requests, the requesting node discards its entire database and requests full synchronization from another node.
 
 ### Virtualization and Kubernetes
 
-The use of virtualization and Kubernetes facilitates easy deployment, management, and scaling of the distributed file system.
+Virtualization and Kubernetes facilitate easy deployment, management, and scaling of the distributed file system.
 
 ### Redis
 
-Redis is incorporated to enhance system performance, acting as a fast and scalable data store, possibly for caching frequently accessed data. In this solution, redis will be used for long time storage aswell, utilising redis persistence.
+Redis enhances system performance, serving as a fast, scalable data store, potentially for caching frequently accessed data. In this solution, Redis is also used for long-term storage, utilizing its persistence features.
 
-#### Messaging between nodes
+#### Messaging Between Nodes
 
-## Description of messages sent and received by nodes
+## Description of Messages Sent and Received by Nodes
 
 ### Client - DHT
-Involves basic API requests from the client, handled by the reverse proxy. Below is an example of a client requesting files inside a specific file path.
+Involves basic API requests from the client, managed by the reverse proxy. Below is an example of a client requesting files within a specific file path.
+
 
 ```
 SELECT
@@ -60,7 +60,7 @@ FILE_PATH
 
 ### DHT - Data Storage Node
 
-Communication via sockets for forwarding client requests to the appropriate server cluster. Below is an example of a delete request between DHT and a data storage node
+Communication via sockets for forwarding client requests to the appropriate server cluster. Below is an example of a delete request between DHT and a data storage node.
 
 ```
 DELETE
@@ -68,9 +68,10 @@ SEQUENCE_ID
 FILE_PATH
 ```
 
+
 ### Data Storage Node - Data Storage Node
 
-Socket-based communication for sending changes and ensuring consistency across nodes. Below is an example of an insert request between 2 data storage nodes.
+Socket-based communication for transmitting changes and ensuring consistency across nodes. Below is an example of an insert request between two data storage nodes.
 
 ```
 INSERT
@@ -79,7 +80,8 @@ FILE_PATH
 DATA
 ```
 
-## Features to implement
 
-What we'll most likely end up doing is a Kubernetes solution with a single DHT capable of scaling up more file storage clusters based on demand. So the solution will end up quite scalable even though the DHT will be ending up as a bottleneck. The solution is fault tolerant as the file storage clusters have read replica backups from the follower nodes in each cluster. However, DHT will be a single point of failure, as we believe we won't have time to implement a solution with multiple DHTs. The system will be synchronized inside each cluster as the leader node commands the followers to make updates to the state.
+## Features to Implement
+
+We'll likely develop a Kubernetes solution with a single DHT capable of scaling up more file storage clusters based on demand. This approach will make the solution highly scalable, even though the DHT may become a bottleneck. The system is fault-tolerant, as file storage clusters have read replica backups from follower nodes in each cluster. However, the DHT is a single point of failure, as we might not have time to implement a multi-DHT solution. Synchronization is maintained within each cluster, with the leader node directing followers to update the state.
 
