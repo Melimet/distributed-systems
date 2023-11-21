@@ -34,7 +34,7 @@ Logical clocks are used to maintain the order of operations inside a cluster. Th
 
 ### Synchronization
 
-If a node is out of sync, it will be detected when it receives a request with a sequence ID that does not match the latest sequence ID it has stored. After a timeout, the node will then send a synchronization request to the leader node to get the missing requests. Nodes will store `x` latest requests to be able to synchronize with other nodes.
+If a follower node is out of sync, it will be detected when the node asks the leader node for the latest sequence id. After a timeout, the follower node will then send a synchronization request to the leader node to get the missing requests. Leader nodes will store `x` latest requests to be able to synchronize with other nodes. Leader node of a cluster will never be out of sync as it is the only one processing state mutating requests.
 
 If the node responding does not have the missing requests, the node that sent the synchronization request will discard its entire database and request a full synchronization from a node.
 
@@ -46,64 +46,40 @@ The use of virtualization and Kubernetes facilitates easy deployment, management
 
 Redis is incorporated to enhance system performance, acting as a fast and scalable data store, possibly for caching frequently accessed data. In this solution, redis will be used for long time storage aswell, utilising redis persistence.
 
-## Nodes description
-
-### Client
-
-
-Initiates basic API requests, interacting with the reverse proxy for file operations.
-### Reverse Proxy
-
-#### Discovery
-
-Handles the discovery of available nodes to distribute requests effectively.
-
-#### Load Balancing
-
-Ensures even distribution of client requests among available nodes, optimizing system performance.
-
-#### Sequencing
-
-Maintains the order of operations to achieve consistency across the distributed file system.
-
-### File server
-
-Responsible for storing files, sending changes to other nodes, and handling requests from the reverse proxy.
-
 #### Messaging between nodes
 
 ## Description of messages sent and received by nodes
 
-### Client - Reverse Proxy
+### Client - DHT
+Involves basic API requests from the client, handled by the reverse proxy. Below is an example of a client requesting files inside a specific file path.
 
-Involves basic API requests from the client, handled by the reverse proxy.
+```
+SELECT
+FILE_PATH
+```
 
-### Reverse Proxy - File Server
+### DHT - Data Storage Node
 
-Communication via sockets for forwarding client requests to the appropriate file server node.
+Communication via sockets for forwarding client requests to the appropriate server cluster. Below is an example of a delete request between DHT and a data storage node
 
-### File Server - File Server
+```
+DELETE
+SEQUENCE_ID
+FILE_PATH
+```
 
-Socket-based communication for sending changes and ensuring consistency across nodes.
+### Data Storage Node - Data Storage Node
+
+Socket-based communication for sending changes and ensuring consistency across nodes. Below is an example of an insert request between 2 data storage nodes.
+
+```
+INSERT
+SEQUENCE_ID
+FILE_PATH
+DATA
+```
 
 ## Features to implement
 
-### Scalability aspects
+What we'll most likely end up doing is a Kubernetes solution with a single DHT capable of scaling up more file storage clusters based on demand. So the solution will end up quite scalable even though the DHT will be ending up as a bottleneck. The solution is fault tolerant as the file storage clusters have read replica backups from the follower nodes in each cluster. However, DHT will be a single point of failure, as we believe we won't have time to implement a solution with multiple DHTs. The system will be synchronized inside each cluster as the leader node commands the followers to make updates to the state.
 
-Enable easy replication of storage nodes to scale the system in response to increased demand.
-
-### Fault tolerance
-
-Implement mechanisms to handle and recover from node failures to ensure system robustness.
-
-### Node discovery
-
-Develop a system for dynamic node discovery, allowing for the addition of new nodes without disrupting operations.
-
-### Synchronization and consistency
-
-Ensure synchronization of file operations and maintain consistency across all distributed nodes.
-
-### Consensus
-
-Implement consensus mechanisms to resolve conflicts and ensure a coherent state among nodes.
