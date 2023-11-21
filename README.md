@@ -8,6 +8,9 @@ The aim of this project is to design and implement a distributed file system tha
 
 ## Architectural overview
 
+![Architecture](https://github.com/Melimet/distributed-systems/assets/33700058/b09cdb32-0776-4bf0-b06f-02bdd806f0f2)
+
+
 ```mermaid
 flowchart LR
     client["Client"]
