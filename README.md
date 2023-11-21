@@ -4,41 +4,12 @@
 
 ## Introduction
 
-The aim of this project is to design and implement a distributed file system that is scalable, reliable and has a strong consistency while maintaining ease of deployment. The chosen architecture follows a Client-Proxy-Nodes model, where the client communicates with a proxy, which in turn interacts with the distributed nodes responsible for storing files. The system emphasizes easy replication of storage nodes to accommodate increased demand and ensure data is not lost in the event of a node failure.
+The aim of this project is to design and implement a distributed file system that is scalable, reliable and has a strong consistency while maintaining ease of deployment. The chosen architecture follows a Client-DHT-Nodes model, where the client communicates with a Distributed hash table(reverse proxy), which in turn interacts with the distributed clusters responsible for storing files. Each file directory has a hash key so a specific cluster is responsible for a set of directories decided by the DHT. Each cluster has a leader and a follower(read replica) in case if the leader node fails.
 
 ## Architectural overview
 
 ![Architecture](https://github.com/Melimet/distributed-systems/assets/33700058/b09cdb32-0776-4bf0-b06f-02bdd806f0f2)
 
-
-```mermaid
-flowchart LR
-    client["Client"]
-    leader["Leader"]
-    follower["Follower"]
-
-    subgraph reverse_proxies["Reverse proxies"]
-        direction TB
-        leader
-        follower
-    end
-
-    subgraph nodes
-        direction TB
-        node_1["Storage node"]
-        node_2["Storage node"]
-        node_3["Storage node"]
-    end
-
-    client --> reverse_proxies
-    reverse_proxies -- "Command, Sequential ID, Data" --> nodes
-    node_1 -- "Command, Sequential ID, Data" --> node_2
-    node_1 -- "Command, Sequential ID, Data" --> node_3
-
-    leader -- "Sequential ID" --> follower
-
-
-```
 
 ### Client
 
