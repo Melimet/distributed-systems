@@ -19,7 +19,8 @@ The client initiates requests to the DHT which handles the responses received.
 
 DHT is responsible for handling client requests. The client requests are then sent to a specific cluster based on a hash key formed from the file directory which the requests wants to use. One of the DHTs is the leader and others are followers. Whenever a new cluster is created, the leader DHT syncs the follower DHTs to match the updated hash table. The updated is then synchronously waited to process on follower nodes before more requests are processed. 
 
-### Clusters
+### Clusters and data storage nodes
+![Node architecture](https://github.com/Melimet/distributed-systems/assets/33700058/1636c968-48d8-4a30-bac1-7a2fcf3ddbcb)
 
 Clusters consist of a leader node and follower nodes. The leader node is responsible for operating on the stored data(Create, update, delete). As the s3 use case is more read heavy, all the followers can respond to read requests, while only the leader is responsible for other data operations.
 
@@ -29,11 +30,11 @@ Clusters are scaled by "splitting" them in half. Whenever a new cluster is creat
 
 ### Logical clock
 
-Logical clocks are used to maintain the order of operations across the distributed file system. The sequence ID requested from the leader node to ensure consistency among reverse proxies.
+Logical clocks are used to maintain the order of operations inside a cluster. The sequence ID requested from the leader node to ensure consistency among nodes in a cluster.
 
 ### Synchronization
 
-If a node is out of sync, it will be detected when it receives a request with a sequence ID that does not match the latest sequence ID it has stored. After a timeout, the node will then send a synchronization request to another node to get the missing requests. Nodes will store `x` latest requests to be able to synchronize with other nodes.
+If a node is out of sync, it will be detected when it receives a request with a sequence ID that does not match the latest sequence ID it has stored. After a timeout, the node will then send a synchronization request to the leader node to get the missing requests. Nodes will store `x` latest requests to be able to synchronize with other nodes.
 
 If the node responding does not have the missing requests, the node that sent the synchronization request will discard its entire database and request a full synchronization from a node.
 
@@ -43,7 +44,7 @@ The use of virtualization and Kubernetes facilitates easy deployment, management
 
 ### Redis
 
-Redis is incorporated to enhance system performance, acting as a fast and scalable data store, possibly for caching frequently accessed data.
+Redis is incorporated to enhance system performance, acting as a fast and scalable data store, possibly for caching frequently accessed data. In this solution, redis will be used for long time storage aswell, utilising redis persistence.
 
 ## Nodes description
 
