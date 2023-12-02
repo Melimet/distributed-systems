@@ -1,10 +1,12 @@
 import socket  
   
 def main():  
-    host = socket.gethostname()  
-    port = 5000  
+    host = 'localhost' 
+
+    port = 5123 
   
     data_storage_node_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
+    # data_storage_node_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  
     data_storage_node_socket.bind((host, port))  
   
     data_storage_node_socket.listen(1)  

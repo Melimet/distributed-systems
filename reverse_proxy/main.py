@@ -1,8 +1,8 @@
 import socket  
   
 def main():  
-    host = socket.gethostname()  
-    port = 6000  
+    host = 'localhost'
+    port = 5124
   
     reverse_proxy_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
     reverse_proxy_socket.bind((host, port))  
@@ -12,7 +12,7 @@ def main():
   
     while True:  
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
-        client_socket.connect((host, 5000))  
+        client_socket.connect((host, 5123))  
   
         message = input(" -> ")  
         while message.lower().strip() != 'bye':  
