@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  proxy:
+    build: .
+    ports:
+      - "8001:80"
+    volumes:
+      - ./app:/app
+
+  node1:
+    build: .
+    ports:
+      - "8002:80"
+    volumes:
+      - ./app:/app
+
+  node2:
+    build: .
+    ports:
+      - "8003:80"
+    volumes:
+      - ./app:/app
+
+network:
+  distributed:
