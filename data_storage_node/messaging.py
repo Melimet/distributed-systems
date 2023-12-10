@@ -1,4 +1,5 @@
 import socket
+import threading
 
 
 class MessagingClient:
@@ -14,7 +15,6 @@ class MessagingClient:
 
 class MessagingServer:
     server_socket: socket.socket
-    client: MessagingClient
 
     def __init__(self, ip: str, port: int, client: MessagingClient):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -24,6 +24,12 @@ class MessagingServer:
         print(f"Server running on {ip}:{port}")
 
     def start(self):
+        threading.Thread(target=self._start_server, daemon=True).start()
+
+    def handle_request(self, data: str):
+        print(f"Received data: {data}")
+
+    def _start_server(self):
         while True:
             connection, address = self.server_socket.accept()
             print(f"Connection from: {address}")
@@ -34,6 +40,3 @@ class MessagingServer:
 
             self.handle_request(data)
             connection.close()
-
-    def handle_request(self, data: str):
-        print(f"Received data: {data}")
