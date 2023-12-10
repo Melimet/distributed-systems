@@ -6,6 +6,10 @@ HALT = -1
 def get_nodes():
     """
     TODO: Remove this and replace it with a RPC call to node registry.
+
+    Returns:
+        id: id of the node
+        node_list: list of tuples containing id and ip of all nodes
     """
 
     id = 0
@@ -61,6 +65,7 @@ class Node:
 
         if id == self.id:
             self.leader = self.id
+            self.leader_elected = True
             self.send_election_message(HALT)
             return
 
