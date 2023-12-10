@@ -1,4 +1,4 @@
-from messaging import MessagingServer, MessagingClient
+from messaging_server import MessagingServer
 
 HOST = "localhost"
 PORT = 5123
