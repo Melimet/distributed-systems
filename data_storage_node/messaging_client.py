@@ -2,11 +2,10 @@ import socket
 
 
 class MessagingClient:
-    client_socket = socket.socket
-
     def __init__(self):
-        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        pass
 
     def send(self, ip: str, port: int, message: str):
-        self.client_socket.connect((ip, port))
-        self.client_socket.send(message.encode())
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+            client_socket.connect((ip, port))
+            client_socket.sendall(message.encode())
