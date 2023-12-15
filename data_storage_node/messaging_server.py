@@ -4,6 +4,7 @@ import select
 from file_storage import FileStorage
 from messaging_client import MessagingClient
 from message_schemas import (
+    AckMessage,
     ElectionMessage,
     FileMessage,
     MessageType,
@@ -61,6 +62,9 @@ class MessagingServer:
             return self.file_storage.synchronize_follower(
                 SyncMessage(data), self.leader_election
             )
+
+        elif message.get_type() == MessageType.HEARTBEAT:
+            return AckMessage.from_ack_message()
 
     async def start_leader_election_if_needed(self):
         while not self.leader_election.leader_elected:
