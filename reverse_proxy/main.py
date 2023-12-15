@@ -11,3 +11,4 @@ client_server = ClientServer('http://localhost:5119')
 @app.delete("/{path:path}")  
 async def root(path: str, request: Request):    
     return await client_server.handle_request(request)    
+

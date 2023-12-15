@@ -28,6 +28,7 @@ def remove_node(ip: str, port: int):
     for node in nodes:
         if node.ip == ip and node.port == port:
             nodes.remove(node)
+            update_successors(nodes)
             break
 
 def update_successors(nodes):
@@ -42,4 +43,5 @@ def update_successors(nodes):
     for i in range(len(nodes)):
         nodes[i].successor_ip = nodes[(i + 1) % len(nodes)].ip
         nodes[i].successor_port = nodes[(i + 1) % len(nodes)].port
+
 
