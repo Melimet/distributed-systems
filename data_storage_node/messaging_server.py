@@ -1,50 +1,68 @@
+import asyncio
 import socket
 import select
+from file_storage import FileStorage
 from messaging_client import MessagingClient
-from message_schemas import ElectionMessage, MessageType, Message
+from message_schemas import (
+    ElectionMessage,
+    FileMessage,
+    MessageType,
+    Message,
+    SyncMessage,
+)
 from leader_election import LeaderElection
 
 
 class MessagingServer:
-    server_socket: socket.socket
     client: MessagingClient
     leader_election: LeaderElection
+    file_storage: FileStorage
+    ip: str
+    port: int
 
     def __init__(self, ip: str, port: int):
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_socket.bind((ip, port))
-        self.server_socket.listen(1)
-
+        self.ip = ip
+        self.port = port
         self.client = MessagingClient()
         self.leader_election = LeaderElection()
+        self.file_storage = FileStorage()
         print(f"Server running on {ip}:{port}")
 
-    def start(self):
-        while True:
-            if self.leader_election.should_start_election():
-                self.leader_election.start_leader_election()
+    async def start(self):
+        server = await asyncio.start_server(self.handle_client, self.ip, self.port)
+        asyncio.create_task(self.start_leader_election_if_needed())
 
-            self.check_incoming_messages()
+        async with server:
+            await server.serve_forever()
 
-    def check_incoming_messages(self):
-        readable, _, _ = select.select([self.server_socket], [], [], 0)
-        if not readable:
-            return
+    async def handle_client(self, reader, writer):
+        data = await reader.read(1024)
+        message = data.decode()
 
-        connection, address = self.server_socket.accept()
-        print(f"Connection from: {address}")
+        response_message = await self.handle_request(message)
+        writer.write(response_message.data.encode())
+        await writer.drain()
+        writer.close()
 
-        data = connection.recv(1024).decode()
-        if not data:
-            return
-
-        self.handle_request(data)
-        connection.close()
-
-    def handle_request(self, data: str):
-        print(f"Received data: {data}")
+    async def handle_request(self, data: str) -> Message:
         message = Message(data)
 
         if message.get_type() == MessageType.ELECTION:
-            message = ElectionMessage(data)
-            self.leader_election.receive_election_message(message.get_id())
+            return await self.leader_election.process_election_message(
+                ElectionMessage(data)
+            )
+
+        elif message.get_type() == MessageType.FILE:
+            return await self.file_storage.process_file_message(
+                FileMessage(data), self.leader_election
+            )
+
+        elif message.get_type() == MessageType.SYNC:
+            return self.file_storage.synchronize_follower(
+                SyncMessage(data), self.leader_election
+            )
+
+    async def start_leader_election_if_needed(self):
+        while not self.leader_election.leader_elected:
+            await self.leader_election.start_leader_election()
+            await asyncio.sleep(5)

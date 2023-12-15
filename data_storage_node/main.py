@@ -1,13 +1,15 @@
+import asyncio
 from messaging_server import MessagingServer
+from config import port
 
 HOST = "localhost"
-PORT = 5120
+PORT = port
 
 
-def main():
+async def main():
     server = MessagingServer(HOST, PORT)
-    server.start()
+    await server.start()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
