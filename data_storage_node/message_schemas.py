@@ -9,6 +9,7 @@ class MessageType(Enum):
     ELECTION = 1
     FILE = 2
     SYNC = 3
+    HEARTBEAT = 4
 
 
 class Message:
@@ -197,3 +198,17 @@ class SyncMessage(Message):
             if key
         ]
         return [FileMessage(file_message) for file_message in file_messages]
+
+
+class HeartbeatMessage(Message):
+    """
+    Message used for heartbeat.
+
+    ```
+    4
+    ```
+    """
+
+    def create() -> "HeartbeatMessage":
+        data = f"{MessageType.HEARTBEAT.value}"
+        return HeartbeatMessage(data)
