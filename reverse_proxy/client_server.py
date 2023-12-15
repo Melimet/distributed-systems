@@ -1,66 +1,42 @@
 import asyncio
 
-MESSAGE_TYPE="2"
-
-SELECT = "0"
-UPSERT = "1"
-DELETE = "2"
-
-
 class ClientServer:
+    MESSAGE_TYPE = "2"
+    SELECT = "0"
+    UPSERT = "1"
+    DELETE = "2"
+
     def __init__(self, host):
         self.host = host
+        self.nodes = [
+            {"ip": "storage0", "port": "5120"},
+            {"ip": "storage1", "port": "5121"},
+            {"ip": "storage2", "port": "5122"}
+        ]
         print("ClientServer initialized")
 
-    async def handleRequest(self, request):
-        # TODO: Implement sending the request to the correct node
-        # TODO: Implement identifying of nodes
-        # TODO: Implement hash table for nodes
-        # TODO: Implement post/delete of nodes
-        nodes = [{
-            "ip": "storage0",
-            "port": "5120"
-        },
-            {
-            "ip": "storage1",
-            "port": "5121"
-        },
-            {
-            "ip": "storage2",
-            "port": "5122"
-        }]
-
+    async def handle_request(self, request):
         file_name = request.path_params["path"]
-        node_ip= nodes[2]['ip']
-        node_port= nodes[2]['port']
-
+        node = self.nodes[2]
 
         if request.method == "GET":
-
-            MESSAGE_TO_SEND = MESSAGE_TYPE + "\n" + SELECT + "\n" + file_name + "\n" + "asd"
-
-            response = await self.sendRequestToNode(node_ip, node_port, MESSAGE_TO_SEND)
-            return response
+            message = self.format_message(self.SELECT, file_name, "asd")
+            return await self.send_request_to_node(node, message)
 
         elif request.method == "POST":
-
             data = await request.body()
-
-            MESSAGE_TO_SEND = MESSAGE_TYPE + "\n" + UPSERT + "\n" + file_name + "\n" + data.decode()
-            response = await self.sendRequestToNode(node_ip, node_port, MESSAGE_TO_SEND)
-            return response
+            message = self.format_message(self.UPSERT, file_name, data.decode())
+            return  await self.send_request_to_node(node, message)
 
         elif request.method == "DELETE":
-                
-                MESSAGE_TO_SEND = MESSAGE_TYPE + "\n" + DELETE + "\n" + file_name + "\n" + ""
-                response = await self.sendRequestToNode(node_ip, node_port, MESSAGE_TO_SEND)
-                return response
+            message = self.format_message(self.DELETE, file_name, "")
+            return await self.send_request_to_node(node, message)
 
         return "Functionality not yet implemented"
 
-    async def sendRequestToNode(self, node_ip: str, node_port: str, message: str):
-        print(f"Sending request to {node_ip}:{node_port}")
-        reader, writer = await asyncio.open_connection(node_ip, node_port)
+    async def send_request_to_node(self, node, message):
+        print(f"Sending request to {node['ip']}:{node['port']}")
+        reader, writer = await asyncio.open_connection(node['ip'], node['port'])
 
         writer.write(message.encode())
         await writer.drain()
@@ -71,3 +47,6 @@ class ClientServer:
         await writer.wait_closed()
 
         return response.decode()
+
+    def format_message(self, operation, file_name, data):
+        return f"{self.MESSAGE_TYPE}\n{operation}\n{file_name}\n{data}"
