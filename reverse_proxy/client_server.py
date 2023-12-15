@@ -5,7 +5,6 @@ MESSAGE_TYPE="2"
 SELECT = "0"
 UPSERT = "1"
 DELETE = "2"
-FILE_NAME = "kalevin_kotialbumi.zip"
 
 
 class ClientServer:
@@ -17,7 +16,7 @@ class ClientServer:
         # TODO: Implement sending the request to the correct node
         # TODO: Implement identifying of nodes
         # TODO: Implement hash table for nodes
-        # TODO: Implement post/put/delete of nodes
+        # TODO: Implement post/delete of nodes
         nodes = [{
             "ip": "storage0",
             "port": "5120"
@@ -31,15 +30,31 @@ class ClientServer:
             "port": "5122"
         }]
 
+        file_name = request.path_params["path"]
+        node_ip= nodes[2]['ip']
+        node_port= nodes[2]['port']
+
+
         if request.method == "GET":
 
-            MESSAGE_TO_SEND = MESSAGE_TYPE + "\n" + SELECT + "\n" + FILE_NAME + "\n" + "asd"
+            MESSAGE_TO_SEND = MESSAGE_TYPE + "\n" + SELECT + "\n" + file_name + "\n" + "asd"
 
-            node_ip= "nodes[0].ip"
-            node_port= "nodes[0].port"
             response = await self.sendRequestToNode(node_ip, node_port, MESSAGE_TO_SEND)
             return response
 
+        elif request.method == "POST":
+
+            data = await request.body()
+
+            MESSAGE_TO_SEND = MESSAGE_TYPE + "\n" + UPSERT + "\n" + file_name + "\n" + data.decode()
+            response = await self.sendRequestToNode(node_ip, node_port, MESSAGE_TO_SEND)
+            return response
+
+        elif request.method == "DELETE":
+                
+                MESSAGE_TO_SEND = MESSAGE_TYPE + "\n" + DELETE + "\n" + file_name + "\n" + ""
+                response = await self.sendRequestToNode(node_ip, node_port, MESSAGE_TO_SEND)
+                return response
 
         return "Functionality not yet implemented"
 
