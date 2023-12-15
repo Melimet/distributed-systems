@@ -6,9 +6,9 @@ services:
       context: .
       dockerfile: Dockerfile.proxy
     ports:
-      - "8000:8000"
+      - "5119:5119"
     environment:
-      - PORT=8000
+      - PORT=5119
       - IP=proxy
     networks:
       - distributed
