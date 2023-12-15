@@ -1,5 +1,3 @@
-import uuid
-
 MESSAGE_TYPE = "5"
 
 class Node:
@@ -10,7 +8,7 @@ class Node:
     successor_port: str
 
     def __init__(self, ip: str, port: int):
-        self.id = uuid.uuid4()
+        self.id = nodes.__len__()
         self.ip = ip
         self.port = port
         self.successor_ip = ""
