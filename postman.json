@@ -1,0 +1,67 @@
+{
+	"info": {
+		"_postman_id": "4dd69b91-5087-4e5e-914f-c58d16ee9a5a",
+		"name": "Distributed_systems",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27798013"
+	},
+	"item": [
+		{
+			"name": "Get kotialbumi",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5119/kalevin_kotialbumi.zip",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5119",
+					"path": [
+						"kalevin_kotialbumi.zip"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upsert kotialbumi",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5119/kalevin_kotialbumi.zip",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5119",
+					"path": [
+						"kalevin_kotialbumi.zip"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete kotialbumi",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5119/kalevin_kotialbumi.zip",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5119",
+					"path": [
+						"kalevin_kotialbumi.zip"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
