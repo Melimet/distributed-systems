@@ -15,4 +15,4 @@ COPY reverse_proxy ./
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD uvicorn main:app --reload --host $IP --port $PORT
+CMD python3 main.py --id $ID --port $PORT --ip $IP

@@ -3,12 +3,14 @@ from message_schemas import Message, MessageType, NodeRegistryMessage
 
 class MessagingServer:
     def __init__(self, ip: str, port: int):
-        pass
+        self.ip = ip
+        self.port = port
 
     async def start(self):
         server = await asyncio.start_server(self.handle_client, self.ip, self.port) 
         
-        pass
+        async with server:
+            await server.serve_forever()
 
     async def handle_client(self, reader, writer):
         data = await reader.read(1024)
