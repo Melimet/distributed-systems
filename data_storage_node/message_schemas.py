@@ -10,6 +10,7 @@ class MessageType(Enum):
     FILE = 2
     SYNC = 3
     HEARTBEAT = 4
+    NODE_REGISTRY = 5
 
 
 class Message:
@@ -95,19 +96,31 @@ class ElectionMessage(Message):
 
     ```
     1
-    <ID>
+    <LEADER_ID>
+    <LEADER_IP>
+    <LEADER_PORT>
     ```
 
     where
-        ID = suggested leader node id or -1 for HALT
+        LEADER_ID    = suggested leader node id or -1 for HALT (optional)
+        LEADER_IP    = ip of the suggested leader node (empty for HALT)
+        LEADER_PORT  = port of the suggested leader node (empty for HALT)
     """
 
-    def from_id(id: int) -> "ElectionMessage":
-        data = f"{MessageType.ELECTION.value}\n{id}"
+    def from_leader(
+        id: int, ip: Optional[str], port: Optional[int]
+    ) -> "ElectionMessage":
+        data = f"{MessageType.ELECTION.value}\n{id}\n{ip}\n{port}"
         return ElectionMessage(data)
 
     def get_id(self) -> int:
         return int(self.get_line(1))
+
+    def get_ip(self) -> Optional[str]:
+        return self.get_line(2)
+
+    def get_port(self) -> Optional[int]:
+        return int(self.get_line(3))
 
 
 class FileOperation(Enum):
@@ -212,3 +225,36 @@ class HeartbeatMessage(Message):
     def create() -> "HeartbeatMessage":
         data = f"{MessageType.HEARTBEAT.value}"
         return HeartbeatMessage(data)
+
+
+class NodeRegistryMessage(Message):
+    """
+    Message used for registering a node to the reverse proxy.
+
+    ```
+    5
+    <NODE_ID>
+    <SUCCESSOR_IP>
+    <SUCCESSOR_PORT>
+    ```
+
+    where
+        NODE_ID         = id of the node that reverse proxy assigned to it (empty if registering)
+        SUCCESSOR_IP    = ip of the successor node that is needed for  (empty if registering)
+        SUCCESSOR_PORT  = port of the successor node that is needed for  (empty if registering)
+    """
+
+    def register() -> "NodeRegistryMessage":
+        data = f"""
+        {MessageType.NODE_REGISTRY.value}
+        """
+        return NodeRegistryMessage(data)
+
+    def get_id(self) -> int:
+        return int(self.get_line(1))
+
+    def get_successor_ip(self) -> str:
+        return self.get_line(2)
+
+    def get_successor_port(self) -> int:
+        return int(self.get_line(3))
