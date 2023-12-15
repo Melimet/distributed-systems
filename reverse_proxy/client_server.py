@@ -47,7 +47,7 @@ class ClientServer:
         node = self.nodes[2]
 
         if request.method == "GET":
-            message = self.format_message(self.SELECT, file_name, "asd")
+            message = self.format_message(self.SELECT, file_name, "")
             return await self.send_request_to_node(node, message)
 
         elif request.method == "POST":
