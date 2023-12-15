@@ -41,7 +41,7 @@ def test_me():
     )
 
     # UPSERT hello.txt "Hello World!" on node 3 (leader)
-    response = client.send("localhost", node_3_port, upsert_hello_world_message.data)
+    response = client.send("0.0.0.0", node_3_port, upsert_hello_world_message.data)
     if response.is_ok():
         print("Got this ACK message from node 3:", response.data)
     else:
@@ -49,7 +49,7 @@ def test_me():
         return
 
     # SELECT hello.txt on node 1 (follower)
-    response = client.send("localhost", node_1_port, select_hello_world_message.data)
+    response = client.send("0.0.0.0", node_1_port, select_hello_world_message.data)
     if response.is_ok():
         print("Got this SELECT from node 1:", response.data)
     else:

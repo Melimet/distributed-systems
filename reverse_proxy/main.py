@@ -1,7 +1,7 @@
 import socket  
   
 def main():  
-    host = 'localhost'
+    host = '0.0.0.0'
     port = 5124
   
     reverse_proxy_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  

@@ -1,0 +1,13 @@
+FROM python:3.11
+
+ARG ID=0
+ARG PORT=5120
+
+ENV ID=$ID
+ENV PORT=$PORT
+
+WORKDIR /data_storage_node
+
+COPY data_storage_node/* ./
+
+CMD python main.py --id $ID --port $PORT --ip 0.0.0.0
