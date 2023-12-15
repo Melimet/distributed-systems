@@ -1,0 +1,57 @@
+version: '3'
+
+services:
+  # proxy:
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile.proxy
+  #   ports:
+  #     - "5120:5120"
+  #   environment:
+  #     - PORT=5123
+  #     - IP=proxy
+  #   networks:
+  #     - distributed
+
+  storage0:
+    build: 
+      context: .
+      dockerfile: Dockerfile.storage
+    ports:
+      - "5120:5120"
+    environment:
+      - ID=0
+      - PORT=5120
+      - IP=storage0
+    networks:
+      - distributed
+
+  storage1:
+    build: 
+      context: .
+      dockerfile: Dockerfile.storage
+    ports:
+      - "5121:5121"
+    environment:
+      - ID=1
+      - PORT=5121
+      - IP=storage1
+    networks:
+      - distributed
+
+  storage2:
+    build: 
+      context: .
+      dockerfile: Dockerfile.storage
+    ports:
+      - "5122:5122"
+    environment:
+      - ID=2
+      - PORT=5122
+      - IP=storage2
+    networks:
+      - distributed
+
+networks:
+  distributed:
+
