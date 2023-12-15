@@ -10,18 +10,18 @@ async def start_messaging_server():
     await messaging_server.start()
 
  
-async def start_client_server():    
-
-    app = FastAPI()    
-    client_server = ClientServer(f'{ip}:8080')
-
-    @app.get("/{path:path}")  
-    @app.post("/{path:path}")  
-    @app.delete("/{path:path}")  
-    async def root(path: str, request: Request):    
-        return await client_server.handle_request(request) 
-
-    uvicorn.run(app, host=ip, port=8080)
+async def start_client_server():      
+    app = FastAPI()      
+    client_server = ClientServer(f'{ip}:8080')  
+  
+    @app.get("/{path:path}")    
+    @app.post("/{path:path}")    
+    @app.delete("/{path:path}")    
+    async def root(path: str, request: Request):      
+        return await client_server.handle_request(request)   
+  
+    server = uvicorn.Server(config=uvicorn.Config(app, host=ip, port=8080))  
+    await server.serve()  
 
 async def main():
     await asyncio.gather(start_messaging_server(), start_client_server())

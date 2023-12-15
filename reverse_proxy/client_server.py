@@ -1,4 +1,5 @@
 import asyncio
+from node_registry import get_leader, nodes
 
 class ClientServer:
     """
@@ -26,11 +27,7 @@ class ClientServer:
             host (str): The host address of the server.
         """
         self.host = host
-        self.nodes = [
-            {"ip": "storage0", "port": "5120"},
-            {"ip": "storage1", "port": "5121"},
-            {"ip": "storage2", "port": "5122"}
-        ]
+
         print("ClientServer initialized")
 
     async def handle_request(self, request):
@@ -44,7 +41,8 @@ class ClientServer:
             The response from the server.
         """
         file_name = request.path_params["path"]
-        node = self.nodes[2]
+        print(f"NODES: {nodes}")
+        node = get_leader()
 
         if request.method == "GET":
             message = self.format_message(self.SELECT, file_name, "")
@@ -72,8 +70,7 @@ class ClientServer:
         Returns:
             The response from the node.
         """
-        print(f"Sending request to {node['ip']}:{node['port']}")
-        reader, writer = await asyncio.open_connection(node['ip'], node['port'])
+        reader, writer = await asyncio.open_connection(node.ip, node.port)
 
         writer.write(message.encode())
         await writer.drain()

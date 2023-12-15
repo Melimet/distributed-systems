@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 
-from reverse_proxy.node_registry import Node, NodeRegistry
+from node_registry import Node
 
 class MessageType(Enum):
     ERROR = -1
@@ -47,6 +47,39 @@ class Message:
             return None
         return lines[index]
 
+class ElectionMessage(Message):
+    """
+    Message used for leader election. Message format for election message is as follows:
+
+    ```
+    1
+    <LEADER_ID>
+    <LEADER_IP>
+    <LEADER_PORT>
+    ```
+
+    where
+        LEADER_ID    = suggested leader node id or -1 for HALT (optional)
+        LEADER_IP    = ip of the suggested leader node (empty for HALT)
+        LEADER_PORT  = port of the suggested leader node (empty for HALT)
+    """
+
+    def from_leader(
+        id: int, ip: Optional[str], port: Optional[int]
+    ) -> "ElectionMessage":
+        data = f"{MessageType.ELECTION.value}\n{id}\n{ip}\n{port}"
+        return ElectionMessage(data)
+
+    def get_id(self) -> int:
+        return int(self.get_line(1))
+
+    def get_ip(self) -> Optional[str]:
+        return self.get_line(2)
+
+    def get_port(self) -> Optional[int]:
+        return int(self.get_line(3))
+
+
 
 class NodeRegistryMessage(Message):
     """
@@ -65,10 +98,8 @@ class NodeRegistryMessage(Message):
         SUCCESSOR_PORT  = port of the successor node that is needed for  (empty if registering)
     """
 
-    def register(data: str, sender_ip: str, sender_port: str) -> "NodeRegistryMessage":
-        new_node = Node(sender_ip, sender_port)
-        NodeRegistry.add_node(new_node)
-        
+    def register(new_node: Node) -> "NodeRegistryMessage":
+
         data = f"""
         {MessageType.NODE_REGISTRY.value}
         {new_node.id}
@@ -77,3 +108,21 @@ class NodeRegistryMessage(Message):
         """
 
         return NodeRegistryMessage(data)
+
+
+class AckMessage(Message):
+    """
+    Message used for acknowledging messages. Message format for ack message is as follows:
+
+    ```
+    0
+    <ACK_MESSAGE>
+    ```
+
+    where
+        ACK_MESSAGE = ack message (might be empty)
+    """
+
+    def from_ack_message(message: Optional[str] = "") -> "AckMessage":
+        data = f"{MessageType.ACK.value}\n{message}"
+        return AckMessage(data)

@@ -12,12 +12,12 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5119/kalevin_kotialbumi.zip",
+					"raw": "http://localhost:8080/kalevin_kotialbumi.zip",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "5119",
+					"port": "8080",
 					"path": [
 						"kalevin_kotialbumi.zip"
 					]
@@ -31,12 +31,12 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5119/kalevin_kotialbumi.zip",
+					"raw": "http://localhost:8080/kalevin_kotialbumi.zip",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "5119",
+					"port": "8080",
 					"path": [
 						"kalevin_kotialbumi.zip"
 					]
@@ -50,12 +50,12 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5119/kalevin_kotialbumi.zip",
+					"raw": "http://localhost:8080/kalevin_kotialbumi.zip",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "5119",
+					"port": "8080",
 					"path": [
 						"kalevin_kotialbumi.zip"
 					]
