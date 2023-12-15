@@ -1,0 +1,28 @@
+# Ignore Python bytecode files
+*.pyc
+
+# Ignore Python cache directories
+__pycache__/
+
+# Ignore virtual environment directories
+venv/
+.env/
+
+# Ignore editor and IDE files
+.vscode/
+.idea/
+
+# Ignore any other build artifacts or temporary files
+*.log
+*.swp
+*.swo
+*.bak
+*.tmp
+*.pyo
+*.pyd
+*.pyz
+*.pyw
+*.pyi
+*.egg-info/
+dist/
+build/
