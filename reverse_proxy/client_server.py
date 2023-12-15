@@ -13,5 +13,4 @@ class ClientServer:
         ##TODO Implement sending the request to the correct node          
         response = request.method + " " + request.url.path 
 
-        # Return the response to the client
         return response
