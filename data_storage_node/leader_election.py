@@ -25,9 +25,9 @@ def get_nodes() -> Tuple[int, List[Node]]:
     """
     id = node_id
     nodes = [
-        Node(0, "localhost", 5120),
-        Node(1, "localhost", 5121),
-        Node(2, "localhost", 5122),
+        Node(0, "storage0", 5120),
+        Node(1, "storage1", 5121),
+        Node(2, "storage2", 5122),
     ]
 
     return id, nodes

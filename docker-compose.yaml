@@ -18,6 +18,7 @@ services:
     environment:
       - ID=0
       - PORT=5120
+      - IP=storage0
     networks:
       - distributed
 
@@ -30,6 +31,7 @@ services:
     environment:
       - ID=1
       - PORT=5121
+      - IP=storage1
     networks:
       - distributed
 
@@ -42,6 +44,7 @@ services:
     environment:
       - ID=2
       - PORT=5122
+      - IP=storage2
     networks:
       - distributed
 

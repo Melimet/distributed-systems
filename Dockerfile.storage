@@ -2,12 +2,16 @@ FROM python:3.11
 
 ARG ID=0
 ARG PORT=5120
+ARG IP=0.0.0.0
 
 ENV ID=$ID
 ENV PORT=$PORT
+ENV IP=$IP
 
 WORKDIR /data_storage_node
 
 COPY data_storage_node/* ./
 
-CMD python main.py --id $ID --port $PORT --ip 0.0.0.0
+RUN pip install --no-cache-dir -r requirements.txt
+
+CMD python main.py --id $ID --port $PORT --ip $IP
