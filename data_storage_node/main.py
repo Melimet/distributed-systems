@@ -1,13 +1,13 @@
 import asyncio
 from messaging_server import MessagingServer
-from config import port
+from config import port, ip
 
-HOST = "localhost"
+IP = ip
 PORT = port
 
 
 async def main():
-    server = MessagingServer(HOST, PORT)
+    server = MessagingServer(IP, PORT)
     await server.start()
 
 
