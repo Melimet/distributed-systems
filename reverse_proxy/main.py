@@ -1,29 +1,13 @@
-import socket  
-  
-def main():  
-    host = 'localhost'
-    port = 5124
-  
-    reverse_proxy_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
-    reverse_proxy_socket.bind((host, port))  
-    reverse_proxy_socket.listen(1)  
-  
-    print('Reverse proxy is listening on port 6000')  
-  
-    while True:  
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
-        client_socket.connect((host, 5123))  
-  
-        message = input(" -> ")  
-        while message.lower().strip() != 'bye':  
-            client_socket.send(message.encode())  
-            data = client_socket.recv(1024).decode()  
-  
-            print('Received from data storage node: ' + data)  
-  
-            message = input(" -> ")  
-  
-        client_socket.close()  
-  
-if __name__ == '__main__':  
-    main()  
+from fastapi import FastAPI, Request    
+from client_server import ClientServer   
+    
+app = FastAPI()    
+    
+client_server = ClientServer('http://localhost:8000')    
+    
+@app.get("/{path:path}")  
+@app.post("/{path:path}")  
+@app.put("/{path:path}")  
+@app.delete("/{path:path}")  
+async def root(path: str, request: Request):    
+    return await client_server.handle(request)    
