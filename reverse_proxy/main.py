@@ -10,4 +10,4 @@ client_server = ClientServer('http://localhost:8000')
 @app.put("/{path:path}")  
 @app.delete("/{path:path}")  
 async def root(path: str, request: Request):    
-    return await client_server.handle(request)    
+    return await client_server.handleRequest(request)    
