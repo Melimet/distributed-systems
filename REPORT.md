@@ -6,11 +6,7 @@ Authors: Erkka Rahikainen, Valtteri Kodisto, Joni Taajamo
 
 Goal: Design and implement a scalable, reliable, and strongly consistent distributed file system (DFS) for large-scale data storage.
 
-Core Functionality:
-* Store and retrieve files across a distributed network of nodes.
-* Handle read-heavy workloads efficiently.
-* Maintain data consistency and fault tolerance.
-* Ensure ease of deployment and management.
+The project implements a distributed file system that is scalable, reliable, and maintains strong consistency while ensuring ease of deployment. The use case is similar to AWS S3, catering to large numbers of users storing vast amounts of data. In this architecture, the client communicates with a reverse proxy), which in turn interacts with distributed nodes responsible for storing files. Each file's root directory is associated with a key, assigning a specific cluster to a set of directories determined by the reverese-proxy. The cluster has a leader and a follower (read replica) to provide redundancy in case the leader node fails.
 
 ## Design Principles
 
@@ -18,14 +14,13 @@ Architecture: Client-server architecture with three main components: client, rev
 
 Client initiates file operations through a user-friendly API. Diverging from the plan, we decided to implement node registry on reverse-proxy, which maintains node metadata and leader-information. Data Storage nodes consist of leader and follower nodes. Leader handles write operations and maintains sequence IDs for consistency. Followers provide read redundancy and efficient data access. Requests flow from client to reverese-proxy to node and back. Leader node processes write requests and synchronizes followers. Sockets are used for inter-node communication (client<->reverese-proxy, reverese-proxy<->storage-node, storage-node<->storage-node).
 
-System uses logical clock to keep track of mutation operations, incrementing it by one.
-
 Using reverse-proxy for maintaining leader information becomes a single point failure, which is hard to avoid.
 
 ## Functionalities Provided
 
-* Naming and Node Discovery: reverse-proxy manages file location based on hash keys and dynamically discovers new nodes for storage-node scaling.
-* Consistency and Synchronization: Leader-follower approach with sequence IDs ensures consistent data across nodes. Leader maintains a history of recent requests for follower synchronization.
+* Shared distributed state: files are stored across nodes, where all file operations are synced using logical clock
+* Naming and Node Discovery: reverse-proxy manages file location based on hash keys and dynamically discovers new nodes for storage-node scaling
+* Consistency and Synchronization: Leader-follower approach with sequence IDs ensures consistent data across nodes. System uses logical clock to keep track of mutation operations, incrementing it by one.
 * Fault Tolerance and Recovery: Storage-nodes remain operational even with follower failures. Full synchronization from another node or leader re-election recovers from leader failure.
 * Scalability: Storage-nodes can be split or joined based on load, with reverse-proxy managing the updated node registry and directing clients to appropriate node.
 
