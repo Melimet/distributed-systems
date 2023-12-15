@@ -6,6 +6,7 @@ class Node:
     port: str
     successor_ip: str
     successor_port: str
+    leader: bool
 
     def __init__(self, ip: str, port: int):
         self.id = nodes.__len__()
@@ -13,16 +14,34 @@ class Node:
         self.port = port
         self.successor_ip = ""
         self.successor_port = ""
+        self.leader = False
 
+    
 nodes = []
+
+def set_leader(node_id: int):
+    for node in nodes:
+        node.leader = node.id == node_id
+
+def get_leader():
+    for node in nodes:
+        if node.leader:
+            return node
+    return None
 
 def getNodes():
     return nodes
 
 def add_node(ip: str, port: int):
-    if not any(node.ip == ip and node.port == port for node in nodes):
-        nodes.append(Node(ip, port))
-        update_successors(nodes)
+    for node in nodes:
+        if node.ip == ip and node.port == port:
+            return node 
+
+    new_node = Node(ip, port)
+    nodes.append(new_node)
+    update_successors(nodes)
+    return new_node
+
 
 def remove_node(ip: str, port: int):
     for node in nodes:

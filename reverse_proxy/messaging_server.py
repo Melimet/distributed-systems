@@ -1,14 +1,17 @@
 import asyncio
-from message_schemas import Message, MessageType, NodeRegistryMessage
+from message_schemas import Message, MessageType, NodeRegistryMessage, ElectionMessage, AckMessage
+from node_registry import set_leader, add_node
 
 class MessagingServer:
     def __init__(self, ip: str, port: int):
-        pass
+        self.ip = ip
+        self.port = port
 
     async def start(self):
         server = await asyncio.start_server(self.handle_client, self.ip, self.port) 
         
-        pass
+        async with server:
+            await server.serve_forever()
 
     async def handle_client(self, reader, writer):
         data = await reader.read(1024)
@@ -24,7 +27,20 @@ class MessagingServer:
 
     
     async def handle_request(self, data: str, sender_ip: str, sender_port: str) -> Message:
+        
         message = Message(data)
+        print("REVERSE PROXY")
+        print(message.data)
+        print("asdasdsaasd")
+        
+
+        if(message.get_type() == MessageType.ELECTION):
+            election_message= ElectionMessage(message.data)
+            set_leader(election_message.get_id)
+            
+            return AckMessage.from_ack_message()
 
         if(message.get_type() == MessageType.NODE_REGISTRY):
-            NodeRegistryMessage.register(message, sender_ip, sender_port)
+            new_node = add_node(sender_ip, sender_port) 
+
+            return NodeRegistryMessage.register(new_node)
