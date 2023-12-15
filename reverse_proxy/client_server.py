@@ -5,6 +5,7 @@ MESSAGE_TYPE="2"
 SELECT = "0"
 UPSERT = "1"
 DELETE = "2"
+FILE_NAME = "kalevin_kotialbumi.zip"
 
 
 class ClientServer:
@@ -16,20 +17,29 @@ class ClientServer:
         # TODO: Implement sending the request to the correct node
         # TODO: Implement identifying of nodes
         # TODO: Implement hash table for nodes
-        # TODO: Implement get/post/put/delete of nodes
-        nodes = ["localhost:5120", "localhost:5121", "localhost:5122"]
+        # TODO: Implement post/put/delete of nodes
+        nodes = [{
+            "ip": "storage0",
+            "port": "5120"
+        },
+            {
+            "ip": "storage1",
+            "port": "5121"
+        },
+            {
+            "ip": "storage2",
+            "port": "5122"
+        }]
 
         if request.method == "GET":
 
-            MESSAGE_TO_SEND = MESSAGE_TYPE + "\n" + SELECT + "\n" + "kalevin_kotialbumi.zip"
+            MESSAGE_TO_SEND = MESSAGE_TYPE + "\n" + SELECT + "\n" + FILE_NAME + "\n" + "asd"
 
-            node_ip= "storage0"
-            node_port= "5120"
+            node_ip= "nodes[0].ip"
+            node_port= "nodes[0].port"
             response = await self.sendRequestToNode(node_ip, node_port, MESSAGE_TO_SEND)
             return response
 
-        # Send request to data_storage_node
-        ##result = await self.sendRequestToNode(nodes[0], request)
 
         return "Functionality not yet implemented"
 
