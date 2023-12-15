@@ -1,17 +1,17 @@
 version: '3'
 
 services:
-  # proxy:
-  #   build: 
-  #     context: .
-  #     dockerfile: Dockerfile.proxy
-  #   ports:
-  #     - "5120:5120"
-  #   environment:
-  #     - PORT=5123
-  #     - IP=proxy
-  #   networks:
-  #     - distributed
+  proxy:
+    build: 
+      context: .
+      dockerfile: Dockerfile.proxy
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - IP=proxy
+    networks:
+      - distributed
 
   storage0:
     build: 

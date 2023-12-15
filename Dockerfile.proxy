@@ -1,0 +1,18 @@
+FROM python:3.11
+
+ARG ID=0
+ARG PORT=8000
+ARG IP=0.0.0.0
+
+ENV ID=$ID
+ENV PORT=$PORT
+ENV IP=$IP
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /reverse_proxy
+
+COPY reverse_proxy/* ./
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+CMD uvicorn main:app --reload
