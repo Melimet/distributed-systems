@@ -16,7 +16,9 @@ Core Functionality:
 
 Architecture: Client-server architecture with three main components: client, reverse-proxy & storage-node.
 
-Client initiates file operations through a user-friendly API. Diverging from the plan, we decided to implement node registry on reverse-proxy, which maintains node metadata and leader-information. Data Storage nodes consist of leader and follower nodes. Leader handles write operations and maintains sequence IDs for consistency. Followers provide read redundancy and efficient data access. Requests flow from client to reverese-proxy to node and back. Leader node processes write requests and synchronizes followers. Sockets are used for inter-node communication (client<->reverese-proxy, reverese-proxy<->storage-node, storage-node<->storage-node). 
+Client initiates file operations through a user-friendly API. Diverging from the plan, we decided to implement node registry on reverse-proxy, which maintains node metadata and leader-information. Data Storage nodes consist of leader and follower nodes. Leader handles write operations and maintains sequence IDs for consistency. Followers provide read redundancy and efficient data access. Requests flow from client to reverese-proxy to node and back. Leader node processes write requests and synchronizes followers. Sockets are used for inter-node communication (client<->reverese-proxy, reverese-proxy<->storage-node, storage-node<->storage-node).
+
+System uses logical clock to keep track of mutation operations, incrementing it by one.
 
 Using reverse-proxy for maintaining leader information becomes a single point failure, which is hard to avoid.
 
