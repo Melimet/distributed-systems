@@ -19,18 +19,18 @@ nodes = []
 def getNodes():
     return nodes
 
-def addNode(ip: str, port: int):
+def add_node(ip: str, port: int):
     if not any(node.ip == ip and node.port == port for node in nodes):
         nodes.append(Node(ip, port))
-        updateSuccessors(nodes)
+        update_successors(nodes)
 
-def removeNode(ip: str, port: int):
+def remove_node(ip: str, port: int):
     for node in nodes:
         if node.ip == ip and node.port == port:
             nodes.remove(node)
             break
 
-def updateSuccessors(nodes):
+def update_successors(nodes):
     if len(nodes) == 0:
         return
     
@@ -42,3 +42,4 @@ def updateSuccessors(nodes):
     for i in range(len(nodes)):
         nodes[i].successor_ip = nodes[(i + 1) % len(nodes)].ip
         nodes[i].successor_port = nodes[(i + 1) % len(nodes)].port
+
