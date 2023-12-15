@@ -2,7 +2,7 @@ from time import time
 from typing import List, Optional, Tuple
 from config import id as node_id
 
-from message_schemas import AckMessage, ElectionMessage
+from message_schemas import AckMessage, ElectionMessage, NodeRegistryMessage
 from messaging_client import MessagingClient
 
 HALT = -1
@@ -35,21 +35,19 @@ def get_nodes() -> Tuple[int, List[Node]]:
 
 class LeaderElection:
     node_id: int
-    nodes: List[Node]
 
-    leader_node_id: int
+    successor_ip: Optional[str]
+    successor_port: Optional[int]
+
+    leader_node_id: Optional[int]
+    leader_node_ip: Optional[str]
+    leader_node_port: Optional[int]
     leader_elected: bool
-    election_start: int
+
     messaging_client: MessagingClient
 
     def __init__(self):
-        id, nodes = get_nodes()
-        self.node_id = id
-        self.nodes = nodes
-
-        self.leader_node_id = id
         self.leader_elected = False
-        self.election_start = 0
         self.messaging_client = MessagingClient()
 
     def is_leader(self) -> bool:
@@ -65,45 +63,68 @@ class LeaderElection:
                 return node
         return None
 
+    async def register_node_and_update_successor(self):
+        response = await self.messaging_client.send_to_reverse_proxy(
+            NodeRegistryMessage.register().data
+        )
+        node_registry_message = NodeRegistryMessage(response.data)
+        self.node_id = node_registry_message.get_id()
+        self.successor_ip = node_registry_message.get_successor_ip()
+        self.successor_port = node_registry_message.get_successor_port()
+
     async def start_leader_election(self):
         """
         Leader is elected with LCR algorithm. Any node can initiate the election.
         The node with the highest id will be elected as the leader.
         """
-        # TODO: Fetch nodes from node registry. Needed for fault tolerance if node fails mid election.
-        self.election_start = int(time() * 1000)
-        self.leader_node_id = self.node_id
+        self.leader_node_id = None
+        self.leader_node_ip = None
+        self.leader_node_port = None
         self.leader_elected = False
+        await self.register_node_and_update_successor()
         await self.send_election_message(self.node_id)
 
-    async def send_election_message(self, id: int):
+    async def send_election_message(
+        self, id: int, ip: Optional[str] = None, port: Optional[int] = None
+    ):
         try:
-            successor = self.get_successor()
-            message = ElectionMessage.from_id(id)
-            await self.messaging_client.send(successor.ip, successor.port, message.data)
+            message = ElectionMessage.from_leader(id, ip, port)
+            await self.messaging_client.send(
+                self.successor_ip, self.successor_port, message.data
+            )
         except:
             pass
 
     async def process_election_message(self, message: ElectionMessage):
         id = message.get_id()
+        ip = message.get_ip()
+        port = message.get_port()
         self.leader_elected = False
+
+        # Need to verify successor to avoid infinite loop
+        await self.register_node_and_update_successor()
 
         if id == HALT:
             print("Elected leader: ", self.leader_node_id)
             self.leader_elected = True
-            self.election_start = 0
             if self.leader_node_id != self.node_id:
                 await self.send_election_message(HALT)
+            else:
+                await self.messaging_client.send_to_reverse_proxy(
+                    ElectionMessage.from_leader(self.node_id).data
+                )
             return AckMessage.from_ack_message()
 
         if id < self.node_id:
             return AckMessage.from_ack_message()
 
+        self.leader_node_id = id
+        self.leader_node_ip = ip
+        self.leader_node_port = port
+
         if id == self.node_id:
-            self.leader_node_id = self.node_id
             await self.send_election_message(HALT)
             return AckMessage.from_ack_message()
-
-        self.leader_node_id = id
-        await self.send_election_message(id)
-        return AckMessage.from_ack_message()
+        else:
+            await self.send_election_message(id, ip, port)
+            return AckMessage.from_ack_message()
