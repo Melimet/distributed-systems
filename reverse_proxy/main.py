@@ -3,7 +3,7 @@ from client_server import ClientServer
     
 app = FastAPI()    
     
-client_server = ClientServer('http://localhost:8000')    
+client_server = ClientServer('http://localhost:5119')    
     
 @app.get("/{path:path}")  
 @app.post("/{path:path}")  
